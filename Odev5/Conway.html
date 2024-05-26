@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conway's Game of Life</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+    .grid-container {
+        display: inline-block;
+    }
+    .grid-item {
+        width: 20px;
+        height: 20px;
+        border: 1px solid #aaa;
+        background-color: #fff;
+        display: inline-block;
+    }
+</style>
+</head>
+<body>
+<div class="grid-container" id="gridContainer"></div>
+<button onclick="startGame()">Start</button>
+<button onclick="stopGame()">Stop</button>
+<button onclick="clearGrid()">Clear</button>
+
+<script>
+    // Grid dimensions
+    const rows = 30;
+    const cols = 30;
+
+    // Initialize grid
+    let grid = new Array(rows).fill(null).map(() => new Array(cols).fill(false));
+
+    // Randomly populate some cells
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            grid[i][j] = Math.random() > 0.7;
+        }
+    }
+
+    // Display grid
+    const gridContainer = document.getElementById('gridContainer');
+    function displayGrid() {
+        gridContainer.innerHTML = '';
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-item';
+                cell.style.backgroundColor = grid[i][j] ? '#000' : '#fff';
+                gridContainer.appendChild(cell);
+                cell.addEventListener('click', () => {
+                    grid[i][j] = !grid[i][j];
+                    displayGrid();
+                });
+            }
+            gridContainer.appendChild(document.createElement('br'));
+        }
+    }
+    displayGrid();
+
+    // Update grid state
+    function updateGrid() {
+        let newGrid = new Array(rows).fill(null).map(() => new Array(cols).fill(false));
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const neighbors = countNeighbors(i, j);
+                if (grid[i][j]) {
+                    newGrid[i][j] = (neighbors === 2 || neighbors === 3);
+                } else {
+                    newGrid[i][j] = neighbors === 3;
+                }
+            }
+        }
+        grid = newGrid;
+        displayGrid();
+    }
+
+    // Count live neighbors
+    function countNeighbors(row, col) {
+        let count = 0;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                const r = row + i;
+                const c = col + j;
+                if (r >= 0 && r < rows && c >= 0 && c < cols && !(i === 0 && j === 0)) {
+                    count += grid[r][c] ? 1 : 0;
+                }
+            }
+        }
+        return count;
+    }
+
+    // Game loop
+    let gameInterval;
+    function startGame() {
+        gameInterval = setInterval(updateGrid, 100);
+    }
+    function stopGame() {
+        clearInterval(gameInterval);
+    }
+    function clearGrid() {
+        grid = new Array(rows).fill(null).map(() => new Array(cols).fill(false));
+        displayGrid();
+    }
+</script>
+</body>
+</html>
